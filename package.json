@@ -1,0 +1,83 @@
+{
+  "name": "learning-electron",
+  "appId": "learning.electron",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "dev": "vite",
+    "dev:debug": "vite -d",
+    "dev:debug:force": "vite -d --force",
+    "build": "npm run build:pre && electron-builder --config=buildAssets/builder/config.js",
+    "build:pre": "npm run format:fix && vue-tsc --noEmit && vite build",
+    "build:all": "npm run build:pre && electron-builder --config=buildAssets/builder/config.js -wml",
+    "build:dir": "npm run build:pre && electron-builder --config=buildAssets/builder/config.js --dir",
+    "build:mac": "npm run build:pre && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config=buildAssets/builder/config.js --mac",
+    "build:linux": "npm run build:pre && electron-builder --config=buildAssets/builder/config.js --linux",
+    "build:win": "npm run build:pre && electron-builder --config=buildAssets/builder/config.js --windows",
+    "lint": "eslint --ext .js,.ts,.vue -f ./node_modules/eslint-friendly-formatter src",
+    "lint:fix": "eslint --ext .js,.ts,.vue -f ./node_modules/eslint-friendly-formatter --fix src",
+    "format": "prettier .",
+    "format:fix": "prettier . --write",
+    "prepare": "husky install",
+    "preinstall": "node ./scripts/preinstall.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,vue}": [
+      "eslint --fix",
+      "stylelint --fix",
+      "prettier --write",
+      "git add"
+    ],
+    "*.{scss,less,styl,html}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "element-plus": "^2.8.8",
+    "pinia": "^2.2.4",
+    "vue": "^3.5.12",
+    "vue-i18n": "^10.0.4",
+    "vue-router": "^4.4.5"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.16.1",
+    "@typescript-eslint/parser": "7.16.1",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "@vitejs/plugin-vue-jsx": "^4.0.1",
+    "dotenv": "^16.4.5",
+    "electron": "^33.0.2",
+    "electron-builder": "^25.1.8",
+    "electron-extension-installer": "^1.2.0",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-config-standard": "17.1.0",
+    "eslint-friendly-formatter": "4.0.1",
+    "eslint-plugin-import": "2.30.0",
+    "eslint-plugin-n": "16.6.2",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-promise": "6.4.0",
+    "eslint-plugin-vue": "9.28.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "tree-kill": "^1.2.2",
+    "typescript": "^5.6.3",
+    "unplugin-auto-import": "^0.18.5",
+    "unplugin-vue-components": "^0.27.4",
+    "vite": "^5.4.10",
+    "vite-plugin-electron": "^0.28.8",
+    "vite-plugin-electron-renderer": "^0.14.6",
+    "vite-plugin-eslint": "1.8.1",
+    "vue-eslint-parser": "9.4.3",
+    "vue-tsc": "^2.1.6"
+  },
+  "overrides": {
+    "vite-plugin-electron": {
+      "electron": "$electron"
+    }
+  }
+}
