@@ -95,6 +95,15 @@ export default defineConfig(({ mode }) => {
       minify: !isDevEnv,
       outDir: DIST_DIR,
     },
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://uat.crm.xuexiluxian.cn',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ''),
+        },
+      },
+    },
     plugins: [
       Vue(),
       VueJsx(),
