@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import piniaPluginPersist from 'pinia-plugin-persist'
 
 import App from '@/renderer/App.vue'
 import router from '@/renderer/router'
@@ -15,9 +16,11 @@ declare global {
 }
 
 const app = createApp(App)
+const store = createPinia()
+store.use(piniaPluginPersist)
 
 app.use(ElementPlus)
 app.use(router)
-app.use(createPinia())
+app.use(store)
 
 app.mount('#app')

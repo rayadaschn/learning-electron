@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'url'
 import { defineConfig, loadEnv } from 'vite'
-import ElectronPlugin, { ElectronOptions } from 'vite-plugin-electron'
+import ElectronPlugin from 'vite-plugin-electron'
 import RendererPlugin from 'vite-plugin-electron-renderer'
 import EslintPlugin from 'vite-plugin-eslint'
 import VueJsx from '@vitejs/plugin-vue-jsx'
@@ -12,30 +12,41 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
-// 环境
+// 项目路径常量
+const ROOT_DIR = resolve('.')
+const SRC_DIR = resolve(ROOT_DIR, 'src')
+const DIST_DIR = resolve(ROOT_DIR, 'dist')
+const RENDERER_DIR = resolve(SRC_DIR, 'renderer')
+const MAIN_DIR = resolve(SRC_DIR, 'main')
+const PRELOAD_DIR = resolve(SRC_DIR, 'preload')
+
+// 构建环境变量配置
 const isDevEnv = process.env.NODE_ENV === 'development'
 const electronEnvConfig = isDevEnv ? { ELECTRON_ENABLE_LOGGING: 'true' } : {}
 
+// 导出 Vite 配置
 export default defineConfig(({ mode }) => {
-  process.env = {
+  const env = {
     ...electronEnvConfig,
     ...process.env,
     ...loadEnv(mode, process.cwd()),
   }
+  process.env = env
 
-  rmSync('dist', { recursive: true, force: true })
+  // 构建前清理输出目录
+  if (isDevEnv) rmSync(DIST_DIR, { recursive: true, force: true })
 
-  const electronPluginConfigs: ElectronOptions[] = [
+  const electronPluginConfigs = [
     {
-      entry: 'src/main/index.ts',
+      entry: resolve(MAIN_DIR, 'index.ts'),
       onstart({ startup }) {
         startup()
       },
       vite: {
-        root: resolve('.'),
+        root: ROOT_DIR,
         build: {
           assetsDir: '.',
-          outDir: 'dist/main',
+          outDir: resolve(DIST_DIR, 'main'),
           rollupOptions: {
             external: ['electron', ...builtinModules],
           },
@@ -43,30 +54,27 @@ export default defineConfig(({ mode }) => {
       },
     },
     {
-      entry: 'src/preload/index.ts',
+      entry: resolve(PRELOAD_DIR, 'index.ts'),
       onstart({ reload }) {
         reload()
       },
       vite: {
-        root: resolve('.'),
+        root: ROOT_DIR,
         build: {
-          outDir: 'dist/preload',
+          outDir: resolve(DIST_DIR, 'preload'),
         },
       },
     },
-  ]
-
-  if (isDevEnv) {
-    electronPluginConfigs.push({
-      entry: 'src/main/index.dev.ts',
+    isDevEnv && {
+      entry: resolve(MAIN_DIR, 'index.dev.ts'),
       vite: {
-        root: resolve('.'),
+        root: ROOT_DIR,
         build: {
-          outDir: 'dist/main',
+          outDir: resolve(DIST_DIR, 'main'),
         },
       },
-    })
-  }
+    },
+  ].filter(Boolean)
 
   return {
     define: {
@@ -79,20 +87,18 @@ export default defineConfig(({ mode }) => {
       },
     },
     base: './',
-    root: resolve('./src/renderer'),
-    publicDir: resolve('./src/renderer/public'),
+    root: RENDERER_DIR,
+    publicDir: resolve(RENDERER_DIR, 'public'),
     clearScreen: false,
     build: {
       sourcemap: isDevEnv,
       minify: !isDevEnv,
-      outDir: resolve('./dist'),
+      outDir: DIST_DIR,
     },
     plugins: [
       Vue(),
       VueJsx(),
-      // Docs: https://github.com/gxmari007/vite-plugin-eslint
       EslintPlugin(),
-      // Docs: https://github.com/electron-vite/vite-plugin-electron
       ElectronPlugin(electronPluginConfigs),
       RendererPlugin(),
       AutoImport({ resolvers: [ElementPlusResolver()] }),
