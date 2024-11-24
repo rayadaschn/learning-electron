@@ -1,5 +1,6 @@
 <script setup lang="tsx">
 import { onMounted, ref } from 'vue'
+import { login } from '../api/user'
 
 const appVersion = ref('Unknown')
 
@@ -13,9 +14,20 @@ const getApplicationVersionFromMainProcess = (): void => {
     appVersion.value = result
   })
 }
+
+const handleLogin = () => {
+  login({
+    password: '123456',
+    username: '1122',
+    key: '123456',
+    captcah: '123456',
+  }).then((res) => {
+    console.log(res)
+  })
+}
 </script>
 
 <template>
-  <div>你好呀!</div>
-  <el-button>按钮11</el-button>
+  <div>你好呀! {{ appVersion }}</div>
+  <el-button @click="handleLogin">请求用户</el-button>
 </template>
